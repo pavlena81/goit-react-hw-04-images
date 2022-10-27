@@ -1,4 +1,4 @@
-import { Component } from "react";
+import {useState, useEffect } from "react";
 // import axios from "axios";
 
 import {getImages} from 'service/service';
@@ -13,96 +13,86 @@ import { Loader } from "./Loader/Loader";
 
 
 
-export class App extends Component {
+export const App = () => {
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [total, setTotal] = useState(0);
 
-  state = {
-    page: 1,
-    query: '',
-    images: [],
-    isLoading: false,
-    total:0,
-  };
-
-  handleSubmit = searchInput => {
+  
+  const handleSubmit = searchInput => {
+        
+    setPage(1);
+    setImages([]);
+    setQuery(searchInput);
     
-    this.setState({  
-      page: 1,
-      images:[],
-      query: searchInput
-    });
     // e.target.reset();
     console.log(searchInput);
   }
 
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-      isLoading: true,
-    }));
+  const loadMore = () => {
+    setPage((prevPage) => prevPage + 1);
+      
+    
   };
 
-  componentDidUpdate(_, prevState) {
-    const { query, page } = this.state;
-    if (
-      prevState.page !== page ||
-      prevState.query !== query
-    ) {
+  useEffect(() => {
+    
       console.log('query');
-      this.getPhotos(query, page);
-    }
-  }
+      getPhotos(query, page);
+    
+  }, [query, page]);
 
-  getPhotos = async (query, page) => {    
+   const getPhotos = async (query, page) => {    
     if (!query) {
       return;
     }
     try {
-      this.setState({ isLoading: true });
+      // this.setState({ isLoading: true });
 
       const data = await getImages(query, page);
       if (data.hits.length === 0) {
         toast.warn('Sorry, there are no images matching your search query. Please try again.');
       }
       if (page === 1) {
-        this.setState({
-          total: data.total,
-          images: data.hits,
-          isLoading: false,
-        });
+        
+          setTotal(data.total);
+          setImages([...data.hits]);
+          setIsLoading(true);
+       
 
       } else {
 
-        this.setState(state => ({
-          images: [...state.images, ...data.hits],
-        }));
+        setImages([...images, ...data.hits]);
+        if (images.length === total) {
+          toast.info('no more pictures')
+        }
       }
 
     } catch (error) {
       toast.error('Sorry, wrong request, try update the page')
-      this.setState({ error });
+      // this.setState({ error });
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
    
-
-
-    render() {
-    const { images, isLoading } = this.state;
+    
+    
     return (
       <div>
         
-        <Searchbar onSubmit={this.handleSubmit} />
+        <Searchbar onSubmit={handleSubmit} />
         {isLoading && <Loader/>}
         <ImageGallery images = {images}/>
         {/* {images.length > 0 ? <ImagesList images={images} /> : null } */}
-        {images.length > 0 && <Button loadMore={this.loadMore} />}
+        {images.length > 0 && <Button loadMore={loadMore} />}
         {/* {isLoading && <Loader/>} */}
         <ToastContainer autoClose={3000} />
       </div>
     );
   }
-}
 
 
 
@@ -115,19 +105,4 @@ export class App extends Component {
 
 
 
-// export const App = () => {
-//   return (
-//     <div
-//       style={{
-//         height: '100vh',
-//         display: 'flex',
-//         justifyContent: 'center',
-//         alignItems: 'center',
-//         fontSize: 40,
-//         color: '#010101'
-//       }}
-//     >
-//       React homework template
-//     </div>
-//   );
-// };
+
