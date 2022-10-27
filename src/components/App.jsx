@@ -37,13 +37,9 @@ export const App = () => {
     
   };
 
-  useEffect(() => {        
-    getPhotos(query, page);
-      console.log('query');
+  useEffect(() => {    
     
-  }, [query, page]);
-
-   const getPhotos = async (query, page) => {    
+    const getPhotos = async (query, page) => {    
     if (!query) {
       return;
     }
@@ -72,8 +68,13 @@ export const App = () => {
         setIsLoading(false);
     }
   };
-   
+       
+    getPhotos(query, page);
+      console.log('query');
     
+  }, [query, page, images, total]);
+
+   
     
     return (
       <div>
