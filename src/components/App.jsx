@@ -37,10 +37,9 @@ export const App = () => {
     
   };
 
-  useEffect(() => {
-    
+  useEffect(() => {        
+    getPhotos(query, page);
       console.log('query');
-      getPhotos(query, page);
     
   }, [query, page]);
 
@@ -52,29 +51,25 @@ export const App = () => {
       // this.setState({ isLoading: true });
 
       const data = await getImages(query, page);
-      if (data.hits.length === 0) {
+      if (data.hits.length === 0 && images.length === total) {
         toast.warn('Sorry, there are no images matching your search query. Please try again.');
       }
       if (page === 1) {
         
           setTotal(data.total);
           setImages([...data.hits]);
-          setIsLoading(true);
-       
+          setIsLoading(true);       
 
       } else {
 
-        setImages([...images, ...data.hits]);
-        if (images.length === total) {
-          toast.info('no more pictures')
-        }
+        setImages([...images, ...data.hits]);       
+        
       }
-
-    } catch (error) {
-      toast.error('Sorry, wrong request, try update the page')
+      } catch (error) {
+         toast.error('Sorry, wrong request, try update the page')
       // this.setState({ error });
-    } finally {
-      setIsLoading(false);
+      } finally {
+        setIsLoading(false);
     }
   };
    
